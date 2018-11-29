@@ -6,8 +6,8 @@
 
 #define TRUE 1
 #define FALSE 0
-#define X 25
-#define Y 12
+#define X 38
+#define Y 15
 #define CLS_CMD "clear" //replace with cls if you're running on windows
 
 typedef struct cord {
@@ -52,24 +52,44 @@ int main() {
 	switch (cmd){
 		case 'a':
 			go_left(&pos);
-			if(check_status(pos,map)) reprint(pos, map);
-                        else status =0;
+			if(check_status(pos,map)==1) reprint(pos, map);
+			else if(check_status(pos,map)==2) {
+					printf("WINNER\n");
+					delay(1000);
+					status = 2;
+			}
+            else status =0;
 			break;
 		case 's':
 			go_down(&pos);
-			if(check_status(pos, map)) reprint(pos, map);
-                        else status = 0;
+			if(check_status(pos,map)==1) reprint(pos, map);
+			else if(check_status(pos,map)==2) {
+					printf("WINNER\n");
+					delay(1000);
+					status = 2;
+			}
+            else status =0;
 			break;
 
 		case 'd':
 			go_right(&pos);
-                        if(check_status(pos,map)) reprint(pos, map);
-                        else status = 0;
+			if(check_status(pos,map)==1) reprint(pos, map);
+		    else if(check_status(pos,map)==2) {
+					printf("WINNER\n");
+					delay(1000);
+					status = 2;
+			}
+            else status =0;
 			break;
 		case 'w':
 			go_up(&pos);
-                        if(check_status(pos,map)) reprint(pos, map);
-			else status = 0;
+			if(check_status(pos,map)==1) reprint(pos, map);		
+            else if(check_status(pos,map)==2) {
+					printf("WINNER\n");
+					delay(1000);
+					status = 2;
+			}
+            else status =0;
 			break;
 		case 'm':
 			status = 2;
@@ -82,10 +102,10 @@ int main() {
 	
 	if(status == 0){
 		lose_condition();
-		delay(2);
+		delay(1000);
 		status = 2;
 		system(CLS_CMD);
-                print_menu();
+        print_menu();
 		continue;
 	}
 	else if(status == 2){
@@ -126,15 +146,22 @@ void go_up(cord *pos){
 
 
 void reprint(cord pos, int map[][X]) {
-    int i, j;
+    int i, j, k =0;
+	char end[4] = {'e','n','d'};
 
     system(CLS_CMD);
     for (i = 0; i < Y; i++) {
         for (j = 0; j < X; j++) {
             if (i == pos.y && j == pos.x) printf("X");
-            else if(map[i][j]) {
+            else if(map[i][j] == 1) {
                 printf("*");
             }
+			else if(map[i][j] == 2){
+				printf("%c", end[k]);
+				k++;
+				if(k==3) k = 0; 
+
+			}
             else printf(" ");
 
         }
@@ -163,6 +190,7 @@ void import_map(int map[][X]){
         for(j = 0; j<max_x; j++){
             c = (char)getc(in);
             if(c == 'x') map[i][j] =1;
+			else if(c == '*') map[i][j] = 2;
             else map[i][j] = 0;
         }
     }
@@ -170,7 +198,9 @@ void import_map(int map[][X]){
 
 int check_status(cord pos, int map[][X]){
 	
-	if(map[pos.y][pos.x]) return FALSE;
+	if(map[pos.y][pos.x]==2) return 2;
+	else if(map[pos.y][pos.x]==1 || pos.y > Y || pos.x > X || pos.y <= 0  || pos.x <=0) return FALSE;
+	
 	return TRUE;
 }
 
