@@ -4,37 +4,32 @@
 #include <time.h>
 
 
-#define TRUE 1
-#define FALSE 0
-#define X 38
-#define Y 15
-#define CLS_CMD "clear" //replace with cls if you're running on windows
+#define TRUE 		1
+#define FALSE 		0
+#define X 		38
+#define Y 		15
+#define CLS_CMD 	"clear" 	//replace with cls if you're running on windows
+
+
 
 typedef struct cord {
     int x;
     int y;
-    char c;
 } cord;
 
+
+
 void go_up(cord *pos);
-
 void go_left(cord *pos);
-
 void go_down(cord *pos);
-
 void go_right(cord *pos);
-
 void reprint(cord pos, int map[][X]);
-
 void delay(int number_of_seconds);
-
 void import_map(int map[][X]);
-
-int check_status(cord pos, int map[][X]); //returns TRUE if you're still in game, returns FALSE if you lose;
-
+int check_status(cord pos, int map[][X]); //returns TRUE if you're still in game, returns FALSE if you lose, 2 if you won;
 void print_menu();
-
 void lose_condition();
+
 
 int main() {
     int status = 2;
@@ -54,43 +49,58 @@ int main() {
 			go_left(&pos);
 			if(check_status(pos,map)==1) reprint(pos, map);
 			else if(check_status(pos,map)==2) {
+					system(CLS_CMD);
 					printf("WINNER\n");
 					delay(1000);
 					status = 2;
+					system(CLS_CMD);
+        			print_menu();
 			}
-            else status =0;
+            		else status =0;
 			break;
+			
 		case 's':
 			go_down(&pos);
 			if(check_status(pos,map)==1) reprint(pos, map);
 			else if(check_status(pos,map)==2) {
+					system(CLS_CMD);
 					printf("WINNER\n");
 					delay(1000);
 					status = 2;
+					system(CLS_CMD);
+        			print_menu();
 			}
-            else status =0;
+            		else status =0;
 			break;
 
 		case 'd':
 			go_right(&pos);
 			if(check_status(pos,map)==1) reprint(pos, map);
-		    else if(check_status(pos,map)==2) {
+		    	else if(check_status(pos,map)==2) {
+					system(CLS_CMD);
 					printf("WINNER\n");
 					delay(1000);
 					status = 2;
-			}
-            else status =0;
+					system(CLS_CMD);
+        				print_menu();
+			}	
+            		else status =0;
 			break;
+			
 		case 'w':
 			go_up(&pos);
 			if(check_status(pos,map)==1) reprint(pos, map);		
-            else if(check_status(pos,map)==2) {
+            		else if(check_status(pos,map)==2) {
+					system(CLS_CMD);
 					printf("WINNER\n");
 					delay(1000);
 					status = 2;
+					system(CLS_CMD);
+        				print_menu();
 			}
-            else status =0;
+            		else status =0;
 			break;
+			
 		case 'm':
 			status = 2;
 			system(CLS_CMD);
@@ -105,9 +115,10 @@ int main() {
 		delay(1000);
 		status = 2;
 		system(CLS_CMD);
-        print_menu();
+        	print_menu();
 		continue;
 	}
+	    
 	else if(status == 2){
 		switch(cmd){
 			case '1':
@@ -169,14 +180,12 @@ void reprint(cord pos, int map[][X]) {
     }
 }
 
-void delay(int number_of_seconds){
-    // Converting time into milli_seconds
-    int milli_seconds = 1000 * number_of_seconds;
+void delay(int millis){
     // Stroing start time
     clock_t start_time = clock();
 
     // looping till required time is not acheived
-    while (clock() < start_time + milli_seconds);
+    while (clock() < start_time + millis);
 }
 
 void import_map(int map[][X]){
