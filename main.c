@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <ncurses.h>
 #include <time.h>
+#include <unistd.h>   
+#include <termios.h>
+
 
 
 #define TRUE 		1
@@ -18,7 +20,6 @@ typedef struct cord {
 } cord;
 
 
-
 void go_up(cord *pos);
 void go_left(cord *pos);
 void go_down(cord *pos);
@@ -29,6 +30,7 @@ void import_map(int map[][X]);
 int check_status(cord pos, int map[][X]); //returns TRUE if you're still in game, returns FALSE if you lose, 2 if you won;
 void print_menu();
 void lose_condition();
+char getch(); //unbuffered stdin
 
 
 int main() {
@@ -42,7 +44,7 @@ int main() {
     system(CLS_CMD);
     print_menu();	
     while(TRUE){
-	cmd = (char)fgetc(stdin);
+	cmd = getch();
 	if(status == 1){
 	switch (cmd){
 		case 'a':
@@ -56,9 +58,8 @@ int main() {
 					system(CLS_CMD);
         			print_menu();
 			}
-            		else status =0;
+            else status =0;
 			break;
-			
 		case 's':
 			go_down(&pos);
 			if(check_status(pos,map)==1) reprint(pos, map);
@@ -70,37 +71,35 @@ int main() {
 					system(CLS_CMD);
         			print_menu();
 			}
-            		else status =0;
+            else status =0;
 			break;
 
 		case 'd':
 			go_right(&pos);
 			if(check_status(pos,map)==1) reprint(pos, map);
-		    	else if(check_status(pos,map)==2) {
+		    else if(check_status(pos,map)==2) {
 					system(CLS_CMD);
 					printf("WINNER\n");
 					delay(1000);
 					status = 2;
 					system(CLS_CMD);
-        				print_menu();
-			}	
-            		else status =0;
+        			print_menu();
+			}
+            else status =0;
 			break;
-			
 		case 'w':
 			go_up(&pos);
 			if(check_status(pos,map)==1) reprint(pos, map);		
-            		else if(check_status(pos,map)==2) {
+            else if(check_status(pos,map)==2) {
 					system(CLS_CMD);
 					printf("WINNER\n");
 					delay(1000);
 					status = 2;
 					system(CLS_CMD);
-        				print_menu();
+        			print_menu();
 			}
-            		else status =0;
+            else status =0;
 			break;
-			
 		case 'm':
 			status = 2;
 			system(CLS_CMD);
@@ -112,13 +111,13 @@ int main() {
 	
 	if(status == 0){
 		lose_condition();
+		fflush(stdout);
 		delay(1000);
 		status = 2;
 		system(CLS_CMD);
         	print_menu();
 		continue;
 	}
-	    
 	else if(status == 2){
 		switch(cmd){
 			case '1':
@@ -165,7 +164,7 @@ void reprint(cord pos, int map[][X]) {
         for (j = 0; j < X; j++) {
             if (i == pos.y && j == pos.x) printf("X");
             else if(map[i][j] == 1) {
-                printf("*");
+                printf("#");
             }
 			else if(map[i][j] == 2){
 				printf("%c", end[k]);
@@ -178,6 +177,7 @@ void reprint(cord pos, int map[][X]) {
         }
         printf("\n");
     }
+printf("Use A S W D to move the cursor - press m to open menu");
 }
 
 void delay(int millis){
@@ -232,8 +232,30 @@ void lose_condition(){
 			printf(" ");
 			j++;
 			}
+		printf("\n");
 		i++;}
 	printf("YOU'RE A LOSER\n\n\n\n");	
 
 
 }
+
+char getch(){    \\Unix systems dont have an unbuffered getc
+    char buf=0;
+    struct termios old={0};
+    fflush(stdout);
+    if(tcgetattr(0, &old)<0)
+        perror("tcsetattr()");
+    old.c_lflag&=~ICANON;
+    old.c_lflag&=~ECHO;
+    old.c_cc[VMIN]=1;
+    old.c_cc[VTIME]=0;
+    if(tcsetattr(0, TCSANOW, &old)<0)
+        perror("tcsetattr ICANON");
+    if(read(0,&buf,1)<0)
+        perror("read()");
+    old.c_lflag|=ICANON;
+    old.c_lflag|=ECHO;
+    if(tcsetattr(0, TCSADRAIN, &old)<0)
+        perror ("tcsetattr ~ICANON");
+    return buf;
+ }
